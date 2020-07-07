@@ -4,7 +4,7 @@ import tabuleiro.Posicao;
 import tabuleiro.Tabuleiro;
 import xadrez.PartidaXadrez;
 
-public class Program {
+public class Programa {
 
 	public static void main(String[] args) {
 	
