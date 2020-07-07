@@ -29,16 +29,24 @@ public class Tabuleiro {
 		this.colunas = colunas;
 	}
 	
-	//metodo para retornar peca 
+	/*metodo para retornar peca*/
 	public Peca peca(int linha, int coluna) {
 		
 		return pecas[linha][coluna];
 	}
 	
-	//metodo para a posicao da peca
+	/*metodo para a posição da peca*/
 	public Peca peca(Posicao posicao) {
 		return pecas[posicao.getLinha()][posicao.getColuna()];
 	}
+	
+	/* metodo responsavel por colocar a peca na posição do tabuleiro*/
+	public void colocarPeca(Peca peca, Posicao posicao) {
+		pecas[posicao.getLinha()][posicao.getColuna()] = peca;
+		peca.posicao = posicao;
+	}
+	
+	/* */
 
 	
 }

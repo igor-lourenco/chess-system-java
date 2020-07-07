@@ -6,6 +6,7 @@ public class UI {
 	
 	public static void printBoard(PecaXadrez[][] pecas) {
 		
+		/*metodo para imprimir o tabuleiro*/
 		for(int i = 0; i < pecas.length; i++) {
 			System.out.print((8-i) + " ");
 			for(int j = 0; j < pecas.length; j++) {
