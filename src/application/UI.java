@@ -45,7 +45,7 @@ public class UI {
 			int linha = Integer.parseInt(s.substring(1));
 			return new PosicaoXadrez(coluna, linha);
 		} catch (RuntimeException e) {
-			throw new InputMismatchException("Erro na criação do tabuleiro: Valores válidos de a1 até h8");
+			throw new InputMismatchException("Erro na criacao do tabuleiro: Valores validos de a1 ate h8");
 		}
 	}
 

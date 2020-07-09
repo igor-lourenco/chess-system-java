@@ -48,7 +48,9 @@ public class PartidaXadrez {
 	/*método para verificar se há peça na posição solicitada pelo usuário*/
 	private void validarPosicao(Posicao posicao) {
 		if(!tabuleiro.temUmaPeca(posicao))
-			throw new XadrezException("Não há peça na poisção de origem");
+			throw new XadrezException("Nao ha peca na posicao de origem");
+		if(!tabuleiro.peca(posicao).existeMovimentoPossivel())
+			throw new XadrezException("nao existe movimentos possiveis para peca de origem");
 	}
 
 	/* metodo para converter as coordenadas para o xadrez */
