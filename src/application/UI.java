@@ -29,6 +29,13 @@ public class UI {
 	public static final String ANSI_PURPLE_BACKGROUND = "\u001B[45m";
 	public static final String ANSI_CYAN_BACKGROUND = "\u001B[46m";
 	public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
+	
+	//https://stackoverflow.com/questions/2979383/java-clear-the-console
+	/*método para limpar a tela*/
+	public static void limparTela() {
+		System.out.println("\033[H\033[2J");
+		System.out.flush();
+	}
 
 	/*método para ler uma posição do usuário*/
 	public static PosicaoXadrez lerPosicao(Scanner sc) {
