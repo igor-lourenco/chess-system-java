@@ -60,10 +60,16 @@ public class UI {
 		printPecaCapturada(capturada);
 		System.out.println();
 		System.out.println("Turno : " + partida.getTurno());
-		System.out.println("Esperando jogador: " + partida.getJogadorAtual());
-		
-		if(partida.getXeque()) {
-			System.out.println("XEQUE!!");
+
+		if (!partida.getXequeMate()) {
+			System.out.println("Esperando jogador: " + partida.getJogadorAtual());
+
+			if (partida.getXeque())
+				System.out.println("XEQUE!!");
+
+		} else {
+			System.out.println("XEQUEMATE!!");
+			System.out.println("Vencedor: " + partida.getJogadorAtual());
 		}
 	}
 
@@ -109,23 +115,21 @@ public class UI {
 		}
 		System.out.print(" ");
 	}
-	
-	/*método para imprimit as peca capturadas*/
+
+	/* método para imprimit as peca capturadas */
 	private static void printPecaCapturada(List<PecaXadrez> capturada) {
 		List<PecaXadrez> branco = capturada.stream().filter(x -> x.getCor() == Cor.BRANCO).collect(Collectors.toList());
 		List<PecaXadrez> preto = capturada.stream().filter(x -> x.getCor() == Cor.PRETO).collect(Collectors.toList());
-		
+
 		System.out.println("Pecas capturadas:");
 		System.out.print("Brancas: ");
 		System.out.print(ANSI_WHITE);
 		System.out.println(Arrays.toString(branco.toArray()));
 		System.out.print(ANSI_RESET);
-		
-		
+
 		System.out.print("Pretas: ");
 		System.out.print(ANSI_YELLOW);
-		System.out.println
-		(Arrays.toString(preto.toArray()));
+		System.out.println(Arrays.toString(preto.toArray()));
 		System.out.print(ANSI_RESET);
 	}
 }
