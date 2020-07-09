@@ -4,6 +4,7 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import xadrez.Cor;
+import xadrez.PartidaXadrez;
 import xadrez.PecaXadrez;
 import xadrez.PosicaoXadrez;
 
@@ -29,15 +30,15 @@ public class UI {
 	public static final String ANSI_PURPLE_BACKGROUND = "\u001B[45m";
 	public static final String ANSI_CYAN_BACKGROUND = "\u001B[46m";
 	public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
-	
-	//https://stackoverflow.com/questions/2979383/java-clear-the-console
-	/*método para limpar a tela*/
+
+	// https://stackoverflow.com/questions/2979383/java-clear-the-console
+	/* método para limpar a tela */
 	public static void limparTela() {
 		System.out.println("\033[H\033[2J");
 		System.out.flush();
 	}
 
-	/*método para ler uma posição do usuário*/
+	/* método para ler uma posição do usuário */
 	public static PosicaoXadrez lerPosicao(Scanner sc) {
 		try {
 			String s = sc.nextLine();
@@ -49,7 +50,15 @@ public class UI {
 		}
 	}
 
-	public static void printBoard(PecaXadrez[][] pecas) {
+	/* método para exibir o turno e o jogador atual */
+	public static void printPartida(PartidaXadrez partida) {
+		printTabuleiro(partida.getPecas());
+		System.out.println();
+		System.out.println("Turno : " + partida.getTurno());
+		System.out.println("Esperando jogador: " + partida.getJogadorAtual());
+	}
+
+	public static void printTabuleiro(PecaXadrez[][] pecas) {
 
 		/* metodo para imprimir o tabuleiro */
 		for (int i = 0; i < pecas.length; i++) {
@@ -62,11 +71,9 @@ public class UI {
 		System.out.println("  a b c d e f g h");
 
 	}
-	
 
-	public static void printBoard(PecaXadrez[][] pecas, boolean[][] possiveisMovimentos) {
-
-		/* metodo para imprimir o tabuleiro */
+	/* metodo para imprimir o tabuleiro com os movimentos possiveis da peca */
+	public static void printTabuleiro(PecaXadrez[][] pecas, boolean[][] possiveisMovimentos) {
 		for (int i = 0; i < pecas.length; i++) {
 			System.out.print((8 - i) + " ");
 			for (int j = 0; j < pecas.length; j++) {
@@ -80,7 +87,7 @@ public class UI {
 
 	/* metodo para imprimir uma peca */
 	private static void printPeca(PecaXadrez peca, boolean background) {
-		if(background)
+		if (background)
 			System.out.print(ANSI_BLUE_BACKGROUND);
 		if (peca == null) {
 			System.out.print("-" + ANSI_RESET);
