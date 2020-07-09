@@ -29,7 +29,7 @@ public class PosicaoXadrez {
 	
 	/*método para converter a posição normal para a posição do xadrez*/
 	protected static PosicaoXadrez converterPosicao(Posicao posicao) {
-		return new PosicaoXadrez((char)('a' - posicao.getColuna()), 8 - posicao.getLinha());
+		return new PosicaoXadrez((char)('a' + posicao.getColuna()), 8 - posicao.getLinha());
 	}
 	 
 	@Override

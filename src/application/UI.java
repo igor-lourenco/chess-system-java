@@ -61,6 +61,10 @@ public class UI {
 		System.out.println();
 		System.out.println("Turno : " + partida.getTurno());
 		System.out.println("Esperando jogador: " + partida.getJogadorAtual());
+		
+		if(partida.getXeque()) {
+			System.out.println("XEQUE!!");
+		}
 	}
 
 	public static void printTabuleiro(PecaXadrez[][] pecas) {
@@ -120,7 +124,8 @@ public class UI {
 		
 		System.out.print("Pretas: ");
 		System.out.print(ANSI_YELLOW);
-		System.out.println(Arrays.toString(preto.toArray()));
+		System.out.println
+		(Arrays.toString(preto.toArray()));
 		System.out.print(ANSI_RESET);
 	}
 }

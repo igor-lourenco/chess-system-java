@@ -2,6 +2,7 @@ package xadrez;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import tabuleiro.Peca;
 import tabuleiro.Posicao;
@@ -14,7 +15,8 @@ public class PartidaXadrez {
 	private int turno;
 	private Cor jogadorAtual;
 	private Tabuleiro tabuleiro;
-	
+	private boolean xeque;
+
 	private List<Peca> pecasNoTabuleiro = new ArrayList<>();
 	private List<Peca> pecasCapturadas = new ArrayList<>();
 
@@ -24,7 +26,7 @@ public class PartidaXadrez {
 		jogadorAtual = Cor.BRANCO;
 		iniciarPartida();
 	}
-	
+
 	public int getTurno() {
 		return turno;
 	}
@@ -32,6 +34,11 @@ public class PartidaXadrez {
 	public Cor getJogadorAtual() {
 		return jogadorAtual;
 	}
+	
+	public boolean getXeque() {
+		return xeque;
+	}
+
 	/* retorna a matriz da peca de xadrez */
 	public PecaXadrez[][] getPecas() {
 
@@ -43,56 +50,98 @@ public class PartidaXadrez {
 		}
 		return mat;
 	}
-	
-	/*método para verificar os movimentos possíveis da peca que o usuario solicitou */
-	public boolean [][] possiveisMovimentos(PosicaoXadrez origemPosicao){
+
+	/*
+	 * método para verificar os movimentos possíveis da peca que o usuario solicitou
+	 */
+	public boolean[][] possiveisMovimentos(PosicaoXadrez origemPosicao) {
 		Posicao posicao = origemPosicao.toPosicao();
 		validarOrigemPosicao(posicao);
 		return tabuleiro.peca(posicao).possiveisMovimentos();
 	}
-	
-	/*método para mover a peca de origem para o destino solicitado*/
-	public PecaXadrez executarXadrez(PosicaoXadrez origemPosicao, PosicaoXadrez destinoPosicao) {
+
+	/* método para mover a peca de origem para o destino solicitado */
+	public PecaXadrez executarMovimentoXadrez(PosicaoXadrez origemPosicao, PosicaoXadrez destinoPosicao) {
 		Posicao origem = origemPosicao.toPosicao();
 		Posicao destino = destinoPosicao.toPosicao();
 		validarOrigemPosicao(origem);
 		validarDestinoPosicao(origem, destino);
-		Peca capturarPeca = fazerMover(origem, destino);
+		Peca capturarPeca = fazerMovimento(origem, destino);
+
+		if (testarXeque(jogadorAtual)) {
+			desfazerMovimento(origem, destino, capturarPeca);
+			throw new XadrezException("Voce nao pode se colocar em xeque");
+		}
+		
+		xeque = (testarXeque(oponente(jogadorAtual))) ? true : false;
+				
 		trocaTurno();
-		return (PecaXadrez)capturarPeca;
+		return (PecaXadrez) capturarPeca;
 	}
-	
-	/*método para remover da posição de origem e colocar na posição de destino*/
-	private Peca fazerMover(Posicao origem, Posicao destino) {
+
+	/* método para remover da posição de origem e colocar na posição de destino */
+	private Peca fazerMovimento(Posicao origem, Posicao destino) {
 		Peca p = tabuleiro.moverPeca(origem);
 		Peca pecaCapturada = tabuleiro.moverPeca(destino);
 		tabuleiro.colocarPeca(p, destino);
-		
-		if(pecaCapturada != null) {
+
+		if (pecaCapturada != null) {
 			pecasNoTabuleiro.remove(pecaCapturada);
 			pecasCapturadas.add(pecaCapturada);
 		}
 		return pecaCapturada;
-		
+
 	}
-	
-	/*método para verificar se há peça na posição de origem solicitada pelo usuário*/
+
+	/* método para desfazer o movimento se o usuário se colocar em xeque */
+	private void desfazerMovimento(Posicao origem, Posicao destino, Peca pecaCapturada) {
+		Peca p = tabuleiro.moverPeca(destino);
+		tabuleiro.colocarPeca(p, origem);
+
+		if (pecaCapturada != null) {
+			tabuleiro.colocarPeca(pecaCapturada, destino);
+			pecasCapturadas.remove(pecaCapturada);
+			pecasNoTabuleiro.add(pecaCapturada);
+		}
+	}
+
+	/* método para testar se o rei está em xeque */
+	private boolean testarXeque(Cor cor) {
+		Posicao posicaoRei = rei(cor).getPosicaoXadrez().toPosicao();
+		List<Peca> pecaOponente = pecasNoTabuleiro.stream().filter(x -> ((PecaXadrez) x).getCor() == oponente(cor))
+				.collect(Collectors.toList());
+
+		for (Peca p : pecaOponente) {
+			boolean[][] mat = p.possiveisMovimentos();
+			if (mat[posicaoRei.getLinha()][posicaoRei.getColuna()])
+				return true;
+		}
+		return false;
+	}
+
+	/*
+	 * método para verificar se há peça na posição de origem solicitada pelo usuário
+	 */
 	private void validarOrigemPosicao(Posicao posicao) {
-		if(!tabuleiro.temUmaPeca(posicao))
+		if (!tabuleiro.temUmaPeca(posicao))
 			throw new XadrezException("Nao ha peca na posicao de origem");
-		if(jogadorAtual != ((PecaXadrez) tabuleiro.peca(posicao)) .getCor())
+		if (jogadorAtual != ((PecaXadrez) tabuleiro.peca(posicao)).getCor())
 			throw new XadrezException("Essa peca nao e " + getJogadorAtual());
-		if(!tabuleiro.peca(posicao).existeMovimentoPossivel())
+		if (!tabuleiro.peca(posicao).existeMovimentoPossivel())
 			throw new XadrezException("Nao existe movimentos possiveis para peca escolhida");
 	}
-	
-	/*método para verificar se há peça na posição de destino solicitada pelo usuário*/
-	private void validarDestinoPosicao(Posicao origem,Posicao destino) {
-		if(!tabuleiro.peca(origem).possivelMovimento(destino))
+
+	/*
+	 * método para verificar se há peça na posição de destino solicitada pelo
+	 * usuário
+	 */
+
+	private void validarDestinoPosicao(Posicao origem, Posicao destino) {
+		if (!tabuleiro.peca(origem).possivelMovimento(destino))
 			throw new XadrezException("Peca escolhida nao pode se mover para essa posicao");
 	}
-	
-	/*método para trocar turno*/
+
+	/* método para trocar turno */
 	private void trocaTurno() {
 		turno++;
 		jogadorAtual = (jogadorAtual == Cor.BRANCO) ? Cor.PRETO : Cor.BRANCO;
@@ -102,6 +151,22 @@ public class PartidaXadrez {
 	private void colocarNovaPeca(char coluna, int linha, PecaXadrez peca) {
 		tabuleiro.colocarPeca(peca, new PosicaoXadrez(coluna, linha).toPosicao());
 		pecasNoTabuleiro.add(peca);
+	}
+
+	/* método para retornar a cor contrário do oponente */
+	private Cor oponente(Cor cor) {
+		return (cor == Cor.BRANCO) ? Cor.PRETO : Cor.BRANCO;
+	}
+
+	private PecaXadrez rei(Cor cor) {
+		List<Peca> list = pecasNoTabuleiro.stream().filter(x -> ((PecaXadrez) x).getCor() == cor)
+				.collect(Collectors.toList());
+
+		for (Peca p : list) {
+			if (p instanceof Rei)
+				return (PecaXadrez) p;
+		}
+		throw new IllegalStateException("Nao ha rei" + cor + " no tabuleiro");
 	}
 
 	/* metodo responsavel por iniciar a partida, colocando as peças no tabuleiro */
