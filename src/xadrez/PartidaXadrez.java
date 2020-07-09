@@ -31,7 +31,8 @@ public class PartidaXadrez {
 	public PecaXadrez executarXadrez(PosicaoXadrez origemPosicao, PosicaoXadrez destinoPosicao) {
 		Posicao origem = origemPosicao.toPosicao();
 		Posicao destino = destinoPosicao.toPosicao();
-		validarPosicao(origem);
+		validarOrigemPosicao(origem);
+		validarDestinoPosicao(origem, destino);
 		Peca capturarPeca = fazerMover(origem, destino);
 		return (PecaXadrez)capturarPeca;
 	}
@@ -45,12 +46,18 @@ public class PartidaXadrez {
 		
 	}
 	
-	/*método para verificar se há peça na posição solicitada pelo usuário*/
-	private void validarPosicao(Posicao posicao) {
+	/*método para verificar se há peça na posição de origem solicitada pelo usuário*/
+	private void validarOrigemPosicao(Posicao posicao) {
 		if(!tabuleiro.temUmaPeca(posicao))
 			throw new XadrezException("Nao ha peca na posicao de origem");
 		if(!tabuleiro.peca(posicao).existeMovimentoPossivel())
-			throw new XadrezException("nao existe movimentos possiveis para peca de origem");
+			throw new XadrezException("Nao existe movimentos possiveis para peca escolhida");
+	}
+	
+	/*método para verificar se há peça na posição de destino solicitada pelo usuário*/
+	private void validarDestinoPosicao(Posicao origem,Posicao destino) {
+		if(!tabuleiro.peca(origem).possivelMovimento(destino))
+			throw new XadrezException("Peca escolhida nao pode se mover para a posicao de destino");
 	}
 
 	/* metodo para converter as coordenadas para o xadrez */
