@@ -1,5 +1,6 @@
 package xadrez;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class PartidaXadrez {
 	private boolean xeque;
 	private boolean xequeMate;
 	private PecaXadrez enPassantVulnerable;
+	private PecaXadrez promoted;
 
 	private List<Peca> pecasNoTabuleiro = new ArrayList<>();
 	private List<Peca> pecasCapturadas = new ArrayList<>();
@@ -48,11 +50,14 @@ public class PartidaXadrez {
 	public boolean getXequeMate() {
 		return xequeMate;
 	}
-	
+
 	public PecaXadrez getEnPassantVulnerable() {
 		return enPassantVulnerable;
 	}
 
+	public PecaXadrez getPromoted() {
+		return promoted;
+	}
 	/* retorna a matriz da peca de xadrez */
 	public PecaXadrez[][] getPecas() {
 
@@ -87,26 +92,66 @@ public class PartidaXadrez {
 			throw new XadrezException("Voce nao pode se colocar em xeque");
 		}
 
-		PecaXadrez pecaMoveu = (PecaXadrez)tabuleiro.peca(destino);
+		PecaXadrez pecaMoveu = (PecaXadrez) tabuleiro.peca(destino);
+		
+		//moimento especial promotion
+		promoted = null;
+		if(pecaMoveu instanceof Peao) {
+			if(pecaMoveu.getCor() == Cor.BRANCO && destino.getLinha() == 0 ||pecaMoveu.getCor() == Cor.PRETO && destino.getLinha() == 7 ) {
+				promoted = (PecaXadrez)tabuleiro.peca(destino);
+				promoted = substituirPecaPromovida("R");
+			}
+		}
+		
 		xeque = (testarXeque(oponente(jogadorAtual))) ? true : false;
 
 		if (testarXequeMate(oponente(jogadorAtual)))
 			xequeMate = true;
 		else
 			trocaTurno();
-		
-		//movimento especial en Passant
-		if(pecaMoveu instanceof Peao && (destino.getLinha() == origem.getLinha() - 2 || destino.getLinha() == origem.getLinha() +2)) 
+
+		// movimento especial en Passant
+		if (pecaMoveu instanceof Peao
+				&& (destino.getLinha() == origem.getLinha() - 2 || destino.getLinha() == origem.getLinha() + 2))
 			enPassantVulnerable = pecaMoveu;
 		else
 			enPassantVulnerable = null;
 
 		return (PecaXadrez) capturarPeca;
 	}
+	
+	/*método para promover a peca peao para a peca que o usuário selecionar*/
+	public PecaXadrez substituirPecaPromovida(String tipo) {
+		if(promoted == null)
+			throw new IllegalStateException("Nao ha peca a ser promovida");
+		if(!tipo.equals("B") && !tipo.equals("C") && !tipo.equals("R") && !tipo.equals("T"))
+		throw new InvalidParameterException("Peca invalida");
+		
+		Posicao pos = promoted.getPosicaoXadrez().toPosicao();
+		Peca p = tabuleiro.moverPeca(pos);
+		pecasNoTabuleiro.remove(p);
+		
+		PecaXadrez novaPeca = novaPeca(tipo, promoted.getCor());
+		tabuleiro.colocarPeca(novaPeca, pos);
+		pecasNoTabuleiro.add(novaPeca);
+		
+		return novaPeca;
+		
+	}
+	
+	/*método para criar uma peca nova*/
+	public PecaXadrez novaPeca(String tipo, Cor cor) {
+		if(tipo.equals("B")) return new Bispo(tabuleiro, cor);
+		if(tipo.equals("C")) return new Cavalo(tabuleiro, cor);
+		if(tipo.equals("R")) return new Rainha(tabuleiro, cor);
+		return new Torre(tabuleiro, cor);
+	}
+	
+	
 
 	/* método para remover da posição de origem e colocar na posição de destino */
 	private Peca fazerMovimento(Posicao origem, Posicao destino) {
-		PecaXadrez p = (PecaXadrez)tabuleiro.moverPeca(origem);
+		PecaXadrez p = (PecaXadrez) tabuleiro.moverPeca(origem);
 		p.increaseContadorTurno();
 		Peca pecaCapturada = tabuleiro.moverPeca(destino);
 		tabuleiro.colocarPeca(p, destino);
@@ -115,39 +160,39 @@ public class PartidaXadrez {
 			pecasNoTabuleiro.remove(pecaCapturada);
 			pecasCapturadas.add(pecaCapturada);
 		}
-		
-		//movimento especial castling Torre pequeno
-		if(p instanceof Rei && destino.getColuna() == origem.getColuna() +2) {
-			Posicao origemT = new Posicao(origem.getLinha(), origem.getColuna() +3);
-			Posicao destinoT = new Posicao(origem.getLinha(), origem.getColuna() +1);
-			PecaXadrez torre = (PecaXadrez)tabuleiro.moverPeca(origemT);
+
+		// movimento especial castling Torre pequeno
+		if (p instanceof Rei && destino.getColuna() == origem.getColuna() + 2) {
+			Posicao origemT = new Posicao(origem.getLinha(), origem.getColuna() + 3);
+			Posicao destinoT = new Posicao(origem.getLinha(), origem.getColuna() + 1);
+			PecaXadrez torre = (PecaXadrez) tabuleiro.moverPeca(origemT);
 			tabuleiro.colocarPeca(torre, destinoT);
 			torre.increaseContadorTurno();
 		}
-		
-		//movimento especial castling Torre grande
-				if(p instanceof Rei && destino.getColuna() == origem.getColuna() -2) {
-					Posicao origemT = new Posicao(origem.getLinha(), origem.getColuna() -4);
-					Posicao destinoT = new Posicao(origem.getLinha(), origem.getColuna() -1);
-					PecaXadrez torre = (PecaXadrez)tabuleiro.moverPeca(origemT);
-					tabuleiro.colocarPeca(torre, destinoT);
-					torre.increaseContadorTurno();
-				}
-				
-		//movimento especial en passant
-			if(p instanceof Peao) {
-				if(origem.getColuna() != destino.getColuna() && pecaCapturada == null) {
-					Posicao posicaoPeao;
-					if(p.getCor() == Cor.BRANCO)
-						posicaoPeao = new Posicao(destino.getLinha() + 1, destino.getColuna());
-					else
-						posicaoPeao = new Posicao(destino.getLinha() -1, destino.getColuna());
-					
-					pecaCapturada = tabuleiro.moverPeca(posicaoPeao);
-					pecasCapturadas.add(pecaCapturada);
-					pecasNoTabuleiro.remove(pecaCapturada);
-				}
+
+		// movimento especial castling Torre grande
+		if (p instanceof Rei && destino.getColuna() == origem.getColuna() - 2) {
+			Posicao origemT = new Posicao(origem.getLinha(), origem.getColuna() - 4);
+			Posicao destinoT = new Posicao(origem.getLinha(), origem.getColuna() - 1);
+			PecaXadrez torre = (PecaXadrez) tabuleiro.moverPeca(origemT);
+			tabuleiro.colocarPeca(torre, destinoT);
+			torre.increaseContadorTurno();
+		}
+
+		// movimento especial en passant
+		if (p instanceof Peao) {
+			if (origem.getColuna() != destino.getColuna() && pecaCapturada == null) {
+				Posicao posicaoPeao;
+				if (p.getCor() == Cor.BRANCO)
+					posicaoPeao = new Posicao(destino.getLinha() + 1, destino.getColuna());
+				else
+					posicaoPeao = new Posicao(destino.getLinha() - 1, destino.getColuna());
+
+				pecaCapturada = tabuleiro.moverPeca(posicaoPeao);
+				pecasCapturadas.add(pecaCapturada);
+				pecasNoTabuleiro.remove(pecaCapturada);
 			}
+		}
 		return pecaCapturada;
 
 	}
@@ -163,39 +208,39 @@ public class PartidaXadrez {
 			pecasCapturadas.remove(pecaCapturada);
 			pecasNoTabuleiro.add(pecaCapturada);
 		}
-		
-		//movimento especial castling Torre pequeno
-				if(p instanceof Rei && destino.getColuna() == origem.getColuna() +2) {
-					Posicao origemT = new Posicao(origem.getLinha(), origem.getColuna() +3);
-					Posicao destinoT = new Posicao(origem.getLinha(), origem.getColuna() +1);
-					PecaXadrez torre = (PecaXadrez)tabuleiro.moverPeca(destinoT);
-					tabuleiro.colocarPeca(torre, origemT);
-					torre.decreaseContadorTurno();
-				}
-				
-				//movimento especial castling Torre grande
-						if(p instanceof Rei && destino.getColuna() == origem.getColuna() -2) {
-							Posicao origemT = new Posicao(origem.getLinha(), origem.getColuna() -4);
-							Posicao destinoT = new Posicao(origem.getLinha(), origem.getColuna() -1);
-							PecaXadrez torre = (PecaXadrez)tabuleiro.moverPeca(destinoT);
-							tabuleiro.colocarPeca(torre, origemT);
-							torre.decreaseContadorTurno();
-						}
-						
-						//movimento especial en passant
-						if(p instanceof Peao) {
-							if(origem.getColuna() != destino.getColuna() && pecaCapturada == enPassantVulnerable) {
-								PecaXadrez peao = (PecaXadrez)tabuleiro.moverPeca(destino);
-								Posicao posicaoPeao;
-								if(p.getCor() == Cor.BRANCO)
-									posicaoPeao = new Posicao(3, destino.getColuna());
-								else
-									posicaoPeao = new Posicao(4, destino.getColuna());
-								
-								tabuleiro.colocarPeca(peao, posicaoPeao);
-								
-							}
-						}
+
+		// movimento especial castling Torre pequeno
+		if (p instanceof Rei && destino.getColuna() == origem.getColuna() + 2) {
+			Posicao origemT = new Posicao(origem.getLinha(), origem.getColuna() + 3);
+			Posicao destinoT = new Posicao(origem.getLinha(), origem.getColuna() + 1);
+			PecaXadrez torre = (PecaXadrez) tabuleiro.moverPeca(destinoT);
+			tabuleiro.colocarPeca(torre, origemT);
+			torre.decreaseContadorTurno();
+		}
+
+		// movimento especial castling Torre grande
+		if (p instanceof Rei && destino.getColuna() == origem.getColuna() - 2) {
+			Posicao origemT = new Posicao(origem.getLinha(), origem.getColuna() - 4);
+			Posicao destinoT = new Posicao(origem.getLinha(), origem.getColuna() - 1);
+			PecaXadrez torre = (PecaXadrez) tabuleiro.moverPeca(destinoT);
+			tabuleiro.colocarPeca(torre, origemT);
+			torre.decreaseContadorTurno();
+		}
+
+		// movimento especial en passant
+		if (p instanceof Peao) {
+			if (origem.getColuna() != destino.getColuna() && pecaCapturada == enPassantVulnerable) {
+				PecaXadrez peao = (PecaXadrez) tabuleiro.moverPeca(destino);
+				Posicao posicaoPeao;
+				if (p.getCor() == Cor.BRANCO)
+					posicaoPeao = new Posicao(3, destino.getColuna());
+				else
+					posicaoPeao = new Posicao(4, destino.getColuna());
+
+				tabuleiro.colocarPeca(peao, posicaoPeao);
+
+			}
+		}
 	}
 
 	/* método para testar se o rei está em xeque */
@@ -306,7 +351,6 @@ public class PartidaXadrez {
 		colocarNovaPeca('f', 2, new Peao(tabuleiro, Cor.BRANCO, this));
 		colocarNovaPeca('g', 2, new Peao(tabuleiro, Cor.BRANCO, this));
 		colocarNovaPeca('h', 2, new Peao(tabuleiro, Cor.BRANCO, this));
-		
 
 		colocarNovaPeca('a', 8, new Torre(tabuleiro, Cor.PRETO));
 		colocarNovaPeca('b', 8, new Cavalo(tabuleiro, Cor.PRETO));
