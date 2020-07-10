@@ -44,7 +44,11 @@ public class Programa {
 				
 				if(partida.getPromoted() != null) {
 					System.out.print("Escolha a peca para ser promovida(B/C/R/T): ");
-					String tipo = sc.nextLine();
+					String tipo = sc.nextLine().toUpperCase();
+					while(!tipo.equals("B") && !tipo.equals("C") && !tipo.equals("R") && !tipo.equals("T")) {
+						System.out.print("Peca invalida ! Escolha a peca para ser promovida(B/C/R/T): ");
+						tipo = sc.nextLine().toUpperCase();
+					}
 					partida.substituirPecaPromovida(tipo);
 				}
 

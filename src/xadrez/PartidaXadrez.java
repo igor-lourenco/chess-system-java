@@ -1,6 +1,6 @@
 package xadrez;
 
-import java.security.InvalidParameterException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,6 +58,7 @@ public class PartidaXadrez {
 	public PecaXadrez getPromoted() {
 		return promoted;
 	}
+
 	/* retorna a matriz da peca de xadrez */
 	public PecaXadrez[][] getPecas() {
 
@@ -93,16 +94,17 @@ public class PartidaXadrez {
 		}
 
 		PecaXadrez pecaMoveu = (PecaXadrez) tabuleiro.peca(destino);
-		
-		//moimento especial promotion
+
+		// moimento especial promotion
 		promoted = null;
-		if(pecaMoveu instanceof Peao) {
-			if(pecaMoveu.getCor() == Cor.BRANCO && destino.getLinha() == 0 ||pecaMoveu.getCor() == Cor.PRETO && destino.getLinha() == 7 ) {
-				promoted = (PecaXadrez)tabuleiro.peca(destino);
+		if (pecaMoveu instanceof Peao) {
+			if (pecaMoveu.getCor() == Cor.BRANCO && destino.getLinha() == 0
+					|| pecaMoveu.getCor() == Cor.PRETO && destino.getLinha() == 7) {
+				promoted = (PecaXadrez) tabuleiro.peca(destino);
 				promoted = substituirPecaPromovida("R");
 			}
 		}
-		
+
 		xeque = (testarXeque(oponente(jogadorAtual))) ? true : false;
 
 		if (testarXequeMate(oponente(jogadorAtual)))
@@ -119,35 +121,35 @@ public class PartidaXadrez {
 
 		return (PecaXadrez) capturarPeca;
 	}
-	
-	/*método para promover a peca peao para a peca que o usuário selecionar*/
+
+	/* método para promover a peca peao para a peca que o usuário selecionar */
 	public PecaXadrez substituirPecaPromovida(String tipo) {
-		if(promoted == null)
+		if (promoted == null)
 			throw new IllegalStateException("Nao ha peca a ser promovida");
-		if(!tipo.equals("B") && !tipo.equals("C") && !tipo.equals("R") && !tipo.equals("T"))
-		throw new InvalidParameterException("Peca invalida");
-		
+		if (!tipo.equals("B") && !tipo.equals("C") && !tipo.equals("R") && !tipo.equals("T"))
+			return promoted;
+
 		Posicao pos = promoted.getPosicaoXadrez().toPosicao();
 		Peca p = tabuleiro.moverPeca(pos);
 		pecasNoTabuleiro.remove(p);
-		
+
 		PecaXadrez novaPeca = novaPeca(tipo, promoted.getCor());
 		tabuleiro.colocarPeca(novaPeca, pos);
 		pecasNoTabuleiro.add(novaPeca);
-		
+
 		return novaPeca;
-		
 	}
-	
-	/*método para criar uma peca nova*/
+
+	/* método para criar uma peca nova */
 	public PecaXadrez novaPeca(String tipo, Cor cor) {
-		if(tipo.equals("B")) return new Bispo(tabuleiro, cor);
-		if(tipo.equals("C")) return new Cavalo(tabuleiro, cor);
-		if(tipo.equals("R")) return new Rainha(tabuleiro, cor);
+		if (tipo.equals("B"))
+			return new Bispo(tabuleiro, cor);
+		if (tipo.equals("C"))
+			return new Cavalo(tabuleiro, cor);
+		if (tipo.equals("R"))
+			return new Rainha(tabuleiro, cor);
 		return new Torre(tabuleiro, cor);
 	}
-	
-	
 
 	/* método para remover da posição de origem e colocar na posição de destino */
 	private Peca fazerMovimento(Posicao origem, Posicao destino) {
