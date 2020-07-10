@@ -102,6 +102,24 @@ public class PartidaXadrez {
 			pecasNoTabuleiro.remove(pecaCapturada);
 			pecasCapturadas.add(pecaCapturada);
 		}
+		
+		//movimento especial castling Torre pequeno
+		if(p instanceof Rei && destino.getColuna() == origem.getColuna() +2) {
+			Posicao origemT = new Posicao(origem.getLinha(), origem.getColuna() +3);
+			Posicao destinoT = new Posicao(origem.getLinha(), origem.getColuna() +1);
+			PecaXadrez torre = (PecaXadrez)tabuleiro.moverPeca(origemT);
+			tabuleiro.colocarPeca(torre, destinoT);
+			torre.increaseContadorTurno();
+		}
+		
+		//movimento especial castling Torre grande
+				if(p instanceof Rei && destino.getColuna() == origem.getColuna() -2) {
+					Posicao origemT = new Posicao(origem.getLinha(), origem.getColuna() -4);
+					Posicao destinoT = new Posicao(origem.getLinha(), origem.getColuna() -1);
+					PecaXadrez torre = (PecaXadrez)tabuleiro.moverPeca(origemT);
+					tabuleiro.colocarPeca(torre, destinoT);
+					torre.increaseContadorTurno();
+				}
 		return pecaCapturada;
 
 	}
@@ -117,6 +135,24 @@ public class PartidaXadrez {
 			pecasCapturadas.remove(pecaCapturada);
 			pecasNoTabuleiro.add(pecaCapturada);
 		}
+		
+		//movimento especial castling Torre pequeno
+				if(p instanceof Rei && destino.getColuna() == origem.getColuna() +2) {
+					Posicao origemT = new Posicao(origem.getLinha(), origem.getColuna() +3);
+					Posicao destinoT = new Posicao(origem.getLinha(), origem.getColuna() +1);
+					PecaXadrez torre = (PecaXadrez)tabuleiro.moverPeca(destinoT);
+					tabuleiro.colocarPeca(torre, origemT);
+					torre.decreaseContadorTurno();
+				}
+				
+				//movimento especial castling Torre grande
+						if(p instanceof Rei && destino.getColuna() == origem.getColuna() -2) {
+							Posicao origemT = new Posicao(origem.getLinha(), origem.getColuna() -4);
+							Posicao destinoT = new Posicao(origem.getLinha(), origem.getColuna() -1);
+							PecaXadrez torre = (PecaXadrez)tabuleiro.moverPeca(destinoT);
+							tabuleiro.colocarPeca(torre, origemT);
+							torre.decreaseContadorTurno();
+						}
 	}
 
 	/* método para testar se o rei está em xeque */
@@ -215,7 +251,7 @@ public class PartidaXadrez {
 		colocarNovaPeca('b', 1, new Cavalo(tabuleiro, Cor.BRANCO));
 		colocarNovaPeca('c', 1, new Bispo(tabuleiro, Cor.BRANCO));
 		colocarNovaPeca('d', 1, new Rainha(tabuleiro, Cor.BRANCO));
-		colocarNovaPeca('e', 1, new Rei(tabuleiro, Cor.BRANCO));
+		colocarNovaPeca('e', 1, new Rei(tabuleiro, Cor.BRANCO, this));
 		colocarNovaPeca('f', 1, new Bispo(tabuleiro, Cor.BRANCO));
 		colocarNovaPeca('g', 1, new Cavalo(tabuleiro, Cor.BRANCO));
 		colocarNovaPeca('h', 1, new Torre(tabuleiro, Cor.BRANCO));
@@ -233,7 +269,7 @@ public class PartidaXadrez {
 		colocarNovaPeca('b', 8, new Cavalo(tabuleiro, Cor.PRETO));
 		colocarNovaPeca('c', 8, new Bispo(tabuleiro, Cor.PRETO));
 		colocarNovaPeca('d', 8, new Rainha(tabuleiro, Cor.PRETO));
-		colocarNovaPeca('e', 8, new Rei(tabuleiro, Cor.PRETO));
+		colocarNovaPeca('e', 8, new Rei(tabuleiro, Cor.PRETO, this));
 		colocarNovaPeca('f', 8, new Bispo(tabuleiro, Cor.PRETO));
 		colocarNovaPeca('g', 8, new Cavalo(tabuleiro, Cor.PRETO));
 		colocarNovaPeca('h', 8, new Torre(tabuleiro, Cor.PRETO));
